@@ -9,6 +9,8 @@
 .badgeEdit{margin-left:auto;width:82px;border:0;border-bottom:1px solid #c5ced9;background:transparent;color:#8791a0;font:inherit;text-align:right;outline:0}.noteEdit{width:220px;border:0;border-bottom:1px solid #c5ced9;background:transparent;color:#7a8494;font:inherit;outline:0}@media print{.badgeEdit,.noteEdit{border:0}}
 .mark{transform-origin:center center}
 .top{flex-wrap:nowrap;overflow:hidden;gap:8px}.top>div{flex:0 0 auto;white-space:nowrap}.tools{flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;overflow-y:hidden}.tools button,.tools .upload,.tools .camera{flex:0 0 auto;white-space:nowrap;word-break:keep-all;line-height:1.15}.pagebar{flex-wrap:nowrap;white-space:nowrap}.pagebar button{flex:0 0 auto;white-space:nowrap}.camera{border:1px solid #166534;background:#dcfce7;color:#166534;border-radius:5px;padding:5px 8px;cursor:pointer;font-weight:bold}.camera input{display:none}.desc b{display:flex;align-items:center}.voiceBtn{margin-left:auto;border:1px solid #2563eb;background:#eff6ff;color:#1d4ed8;border-radius:4px;padding:3px 7px;font-size:10px;font-weight:bold}.voiceBtn.listening{background:#fee2e2;color:#b91c1c;border-color:#ef4444}.descPrint{display:none;white-space:pre-wrap;overflow-wrap:anywhere}@media print{.voiceBtn{display:none!important}.desc textarea{display:none!important}.descPrint{display:block;font-size:15px;line-height:1.7}.paper{height:auto!important}}
+
+.cameraModal{position:fixed;inset:0;z-index:9999;background:#000;display:none;flex-direction:column}.cameraModal.show{display:flex}.cameraView{position:relative;flex:1;min-height:0;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}.cameraView video{width:100%;height:100%;object-fit:contain;background:#000}.cameraBar{height:88px;flex:0 0 88px;background:#111;display:flex;align-items:center;justify-content:center;gap:36px;padding:10px 18px}.cameraClose,.cameraShot{border:0!important;color:#fff!important;cursor:pointer}.cameraClose{background:#333!important;border-radius:24px!important;padding:12px 20px!important;font-weight:bold}.cameraShot{width:64px;height:64px;border-radius:50%!important;background:#fff!important;box-shadow:0 0 0 5px #777 inset,0 0 0 2px #fff}.cameraHint{position:absolute;top:14px;left:0;right:0;text-align:center;color:#fff;font-weight:bold;text-shadow:0 1px 3px #000;padding:0 50px}.cameraFlip{position:absolute;right:16px;top:12px;border:0;background:#222b;color:#fff;border-radius:18px;padding:8px 12px;font-weight:bold}@media print{.cameraModal{display:none!important}}
 </style>
 <style>
 .mark.text{box-sizing:border-box;}
@@ -17,13 +19,15 @@
 </head><body>
 <header class="top"><div class="logo">▣ 설비 안내서 제작기</div><div><button onclick="addPage()">＋ 페이지</button> <button onclick="copyPage()">복제</button> <button class="print" onclick="printAll()">전체 A4 출력</button></div></header>
 <div class="app"><aside class="side"><div class="head">대목록 <button onclick="addMain()">＋</button></div><div class="list" id="mains"></div><div class="mini"><button onclick="addMain()">＋ 추가</button><button onclick="delMain()">삭제</button></div><div class="head">중목록 <button onclick="addMid()">＋</button></div><div class="list" id="mids"></div><div class="mini"><button onclick="addMid()">＋ 추가</button><button onclick="delMid()">삭제</button></div><div class="head">소목록 <button onclick="addSmall()">＋</button></div><div class="list" id="smalls"></div><div class="mini"><button onclick="addSmall()">＋ 추가</button><button onclick="delSmall()">삭제</button></div></aside>
-<main class="editor"><div class="tools"><label class="camera"><input type="file" accept="image/*" capture="environment" onchange="loadPhoto(event)">📷 사진 촬영</label><label class="upload"><input type="file" accept="image/*" onchange="loadPhoto(event)">▧ 사진 첨부</label><button onclick="addMark('text')">T 텍스트</button><button onclick="addMark('box')">□ 사각형</button><button onclick="addMark('circle')">○ 원</button><button onclick="addMark('arrow')">➜ 화살표</button><button onclick="removeMark()">선택 삭제</button></div>
+<main class="editor"><div class="tools"><button type="button" class="camera" onclick="openCamera()">📷 사진 촬영</button><label class="upload"><input type="file" accept="image/*" onchange="loadPhoto(event)">▧ 사진 첨부</label><button onclick="addMark('text')">T 텍스트</button><button onclick="addMark('box')">□ 사각형</button><button onclick="addMark('circle')">○ 원</button><button onclick="addMark('arrow')">➜ 화살표</button><button onclick="removeMark()">선택 삭제</button></div>
 <div class="pagebar" id="pagebar"></div><div class="stage"><article class="paper"><div class="band"><span id="bandMain">소방</span><b id="bandSub">화재 시 행동요령</b><input class="badgeEdit" aria-label="오른쪽 위 문구" value="안전 안내서"></div><input class="title" value="화재 발생 시 초기 대응 안내">
 <div class="photo" id="photo"><label class="empty" id="empty"><input type="file" accept="image/*" onchange="loadPhoto(event)"><strong>＋</strong><b>현장 사진을 첨부하세요</b><small>JPG, PNG</small></label></div>
 <div class="adjust" id="adjust"><b>선택 요소</b><label>가로 <input id="rw" type="range" min="30" max="350" oninput="resizeMark()"></label><label>세로 <input id="rh" type="range" min="22" max="220" oninput="resizeMark()"></label><label>색 <input id="rc" type="color" oninput="resizeMark()"></label></div>
 <div class="desc"><b>● 상세 설명 <button type="button" class="voiceBtn" onclick="toggleVoice()">🎤 음성 입력</button></b><textarea>1. 화재를 발견하면 즉시 주변에 알리고 비상벨을 누릅니다.
 2. 안전이 확보된 경우에만 소화기를 사용합니다.
 3. 연기가 퍼지기 전에 가장 가까운 비상구로 대피합니다.</textarea></div><div class="foot"><input class="noteEdit" aria-label="왼쪽 아래 문구" value="안전을 위해 정기적으로 내용을 확인해 주세요."><label class="dept"><input aria-label="하단 관리 문구" value="관리부서: 안전관리팀"></label></div></article></div></main></div>
+
+<div class="cameraModal" id="cameraModal"><div class="cameraView"><video id="cameraVideo" autoplay playsinline muted></video><div class="cameraHint">촬영 버튼을 누르면 바로 사진에 들어갑니다</div><button type="button" class="cameraFlip" onclick="flipCamera()">↻ 전환</button></div><div class="cameraBar"><button type="button" class="cameraClose" onclick="closeCamera()">취소</button><button type="button" class="cameraShot" aria-label="촬영" onclick="takeCameraPhoto()"></button></div><canvas id="cameraCanvas" hidden></canvas></div>
 <script>
 let data=[{name:"소방",mids:[{name:"화재 대응",smalls:["화재 시 행동요령","비화재 시 확인사항"]},{name:"소방시설",smalls:["소화기 사용법"]}]},{name:"전기",mids:[{name:"전기 안전",smalls:["정전 시 조치","누전 점검"]}]},{name:"기기",mids:[{name:"기기 관리",smalls:["기기 작동법"]}]}],mi=0,di=0,si=0,chosen=null;
 function draw(){let main=data[mi],mid=main.mids[di];mains.innerHTML=data.map((x,i)=>`<button class="${i==mi?'on':''}" onclick="mi=${i};di=0;si=0;draw()">${x.name} (${x.mids.length})</button>`).join("");mids.innerHTML=main.mids.map((x,i)=>`<button class="${i==di?'on':''}" onclick="di=${i};si=0;draw()">${x.name} (${x.smalls.length})</button>`).join("");smalls.innerHTML=mid?mid.smalls.map((x,i)=>`<button class="${i==si?'on':''}" onclick="si=${i};draw()">${x}</button>`).join(""):"";bandMain.textContent=main.name;bandSub.textContent=(mid?mid.name:"중목록 없음")+" · "+(mid?.smalls[si]||"소목록 없음")}
@@ -68,8 +72,51 @@ function paperHTML(){let src=document.querySelector(".paper"),c=src.cloneNode(tr
 let pageItems=[],pageIndex=0;function savePage(){if(pageItems.length)pageItems[pageIndex]={html:paperHTML(),mi,di,si}}function restorePage(){let p=pageItems[pageIndex];document.querySelector(".paper").innerHTML=p.html;mi=p.mi;di=p.di;si=p.si;chosen=null;document.querySelectorAll(".mark").forEach(x=>x.onpointerdown=drag);adjust.classList.remove("show");draw();pageButtons()}
 function pageButtons(){pagebar.innerHTML=pageItems.map((_,i)=>`<button class="${i==pageIndex?'on':''}" onclick="goPage(${i})">${i+1}쪽</button>`).join("")+`<button onclick="addPage()">＋</button><button onclick="delPage()">쪽 삭제</button>`}
 function goPage(i){savePage();pageIndex=i;restorePage()}function addPage(){savePage();newDoc();mi=di=si=0;draw();pageItems.push({html:paperHTML(),mi,di,si});pageIndex=pageItems.length-1;restorePage()}function copyPage(){savePage();pageItems.push({...pageItems[pageIndex]});pageIndex=pageItems.length-1;restorePage()}function delPage(){if(pageItems.length<2)return alert("페이지가 한 장뿐입니다.");if(!confirm("현재 페이지를 삭제할까요?"))return;pageItems.splice(pageIndex,1);pageIndex=Math.max(0,pageIndex-1);restorePage()}
-function printAll(){savePage();let css=document.querySelector("style").textContent,w=open("","_blank");if(!w)return alert("팝업을 허용해 주세요.");let body=pageItems.map((p,i)=>`<article class="paper" style="page-break-after:${i===pageItems.length-1?'auto':'always'}">${p.html}</article>`).join("");w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>안내서 출력</title><style>${css}body{background:#fff}.paper{display:block;margin:0}.handle,.adjust,.voiceBtn{display:none!important}</style></head><body>${body}<script>onload=()=>{print();close()}<\/script></body></html>`);w.document.close()}
+function printAll(){savePage();let css=document.querySelector("style").textContent,w=open("","_blank");if(!w)return alert("팝업을 허용해 주세요.");let body=pageItems.map((p,i)=>`<article class="paper" style="page-break-after:${i===pageItems.length-1?'auto':'always'}">${p.html}</article>`).join("");w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>안내서 출력</title><style>${css}body{background:#fff}.paper{display:block;margin:0}.handle,.adjust,.voiceBtn{display:none!important}</style></head><body>${body}<script>onload=()=>{print();close()}<\/script>
+<script>
+function nativeCamera(){
+  if(window.Android && Android.openCamera){ Android.openCamera(); }
+  else { alert("안드로이드 앱에서 카메라를 실행해 주세요."); }
+}
+window.receiveNativePhoto=function(dataUrl){
+  const board=document.querySelector(".photo");
+  if(!board)return;
+  board.querySelector("img")?.remove();
+  const blank=board.querySelector(".empty");
+  if(blank)blank.style.display="none";
+  const im=new Image();
+  im.src=dataUrl;
+  board.prepend(im);
+  if(typeof savePage==="function") savePage();
+};
+</script>
+</body></html>`);w.document.close()}
 function mergeSpeech(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;let left=a.split(/\s+/),right=b.split(/\s+/);for(let n=Math.min(left.length,right.length);n>0;n--)if(left.slice(-n).join(" ")===right.slice(0,n).join(" "))return left.concat(right.slice(n)).join(" ");return a+" "+b}let voiceRecognition=null;function toggleVoice(){let btn=document.querySelector(".voiceBtn"),area=document.querySelector(".desc textarea");if(voiceRecognition){voiceRecognition.stop();return}let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return alert("이 브라우저는 음성 입력을 지원하지 않습니다. 휴대폰 Chrome에서 열어 주세요.");let base=area.value.trim(),r=new R;r.lang="ko-KR";r.continuous=true;r.interimResults=true;r.onresult=e=>{let spoken="";for(let i=0;i<e.results.length;i++)spoken=mergeSpeech(spoken,e.results[i][0].transcript);area.value=(base?base+"\n":"")+spoken};r.onerror=e=>{if(e.error==="not-allowed")alert("음성 입력을 사용하려면 마이크 권한을 허용해 주세요.")};r.onend=()=>{voiceRecognition=null;btn.textContent="🎤 음성 입력";btn.classList.remove("listening")};voiceRecognition=r;btn.textContent="■ 음성 중지";btn.classList.add("listening");r.start()}
+let cameraStream=null,cameraFacing="environment",cameraTargetPage=0;
+async function openCamera(){
+ cameraTargetPage=pageIndex;
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert("이 브라우저에서는 직접 카메라 촬영을 지원하지 않습니다. Chrome에서 열어 주세요.");return}
+ try{
+  cameraModal.classList.add("show");
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});
+  cameraVideo.srcObject=cameraStream;
+  await cameraVideo.play();
+ }catch(err){cameraModal.classList.remove("show");stopCameraStream();alert("카메라를 열 수 없습니다. 카메라 권한을 허용해 주세요.\n※ 직접 카메라는 HTTPS 또는 localhost에서 실행해야 합니다.")}
+}
+function stopCameraStream(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}cameraVideo.srcObject=null}
+function closeCamera(){stopCameraStream();cameraModal.classList.remove("show")}
+async function flipCamera(){cameraFacing=cameraFacing==="environment"?"user":"environment";stopCameraStream();try{cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing}},audio:false});cameraVideo.srcObject=cameraStream;await cameraVideo.play()}catch(e){alert("카메라 전환에 실패했습니다.")}}
+function takeCameraPhoto(){
+ if(!cameraVideo.videoWidth)return;
+ let c=cameraCanvas;c.width=cameraVideo.videoWidth;c.height=cameraVideo.videoHeight;
+ c.getContext("2d").drawImage(cameraVideo,0,0,c.width,c.height);
+ let src=c.toDataURL("image/jpeg",.92);
+ function put(board){board.querySelector("img")?.remove();let blank=board.querySelector(".empty");if(blank)blank.style.display="none";let im=new Image;im.src=src;board.prepend(im)}
+ if(cameraTargetPage===pageIndex)put(document.querySelector(".photo"));else{let wrap=document.createElement("div");wrap.innerHTML=pageItems[cameraTargetPage].html;put(wrap.querySelector(".photo"));pageItems[cameraTargetPage].html=wrap.innerHTML}
+ closeCamera();
+}
+window.addEventListener("pagehide",stopCameraStream);
+
 draw();pageItems=[{html:paperHTML(),mi,di,si}];pageButtons();
 
 document.addEventListener("keydown",function(e){
@@ -80,4 +127,22 @@ if(chosen&&chosen.classList&&chosen.classList.contains("mark")){
 e.preventDefault();chosen.remove();chosen=null;adjust.classList.remove("show");
 }
 });
-</script></body></html>
+</script>
+<script>
+function nativeCamera(){
+  if(window.Android && Android.openCamera){ Android.openCamera(); }
+  else { alert("안드로이드 앱에서 카메라를 실행해 주세요."); }
+}
+window.receiveNativePhoto=function(dataUrl){
+  const board=document.querySelector(".photo");
+  if(!board)return;
+  board.querySelector("img")?.remove();
+  const blank=board.querySelector(".empty");
+  if(blank)blank.style.display="none";
+  const im=new Image();
+  im.src=dataUrl;
+  board.prepend(im);
+  if(typeof savePage==="function") savePage();
+};
+</script>
+</body></html>
